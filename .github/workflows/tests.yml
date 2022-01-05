@@ -178,6 +178,57 @@ jobs:
         run: |
           twine upload --skip-existing dist/*
 
+  build-relstorage-aarch64:
+    # Sigh. Note that the matrix must be kept in sync
+    # with `test`
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39]
+        os: [ubuntu-18.04]
+        # ubuntu 18.04 ships with mysql 5.7; ubuntu 20.04 ships with
+        # mysql 8.0
+        include:
+          - os: ubuntu-20.04
+            python-version: cp38-cp38
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: Build Wheel
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            ${{ env.img }} \
+            bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
+            source .env/bin/activate && \
+            echo "Install ccache, configure CFLAGS (ubuntu)" && \
+            yum -y install wget && \
+            wget https://download-ib01.fedoraproject.org/pub/epel/7/aarch64/Packages/c/ccache-3.3.4-1.el7.aarch64.rpm && \
+            rpm -i ccache-3.3.4-1.el7.aarch64.rpm && \
+            export CFLAGS=$CFLAGS -std=gnu++11 && \
+            export CXXFLAGS=$CXXCFLAGS -std=gnu++11 && \
+            echo "Install native libs" && \
+            yum install -y libmemcached-devel && \
+            echo "Install Build Dependencies" && \
+            pip install -U pip && \
+            pip install -U -q setuptools wheel twine && \
+            pip install -q -U "cython>=3.0a6" && \
+            pip install "greenlet>=1.0a1;platform_python_implementation==\"CPython\"" && \
+            echo "Build RelStorage" && \
+            python setup.py build_ext -i && \
+            python setup.py bdist_wheel && \
+            pip install .[test] && \
+            echo "Check RelStorage build" && \
+            ls -l dist && \
+            twine check dist/* && \
+            deactivate'
+      - name: Upload RelStorage wheel
+        uses: actions/upload-artifact@v2
+        with:
+          name: RelStorage-${{ runner.os }}-${{ matrix.python-version }}.whl
+          path: dist/*whl
+
   test:
     needs: build-relstorage
     runs-on: ${{ matrix.os }}
