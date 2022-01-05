@@ -191,11 +191,17 @@ jobs:
         include:
           - os: ubuntu-20.04
             python-version: cp38-cp38
-
+      fail-fast: false
+    env:
+      py: /opt/python/${{ matrix.python-version }}/bin/python
+      img: quay.io/pypa/manylinux2014_aarch64
     steps:
       - name: checkout
         uses: actions/checkout@v2
 
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
       - name: Build Wheel
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
