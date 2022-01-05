@@ -533,6 +533,9 @@ jobs:
 
       - name: Update pip
         run: pip install -U pip
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
       - name: Build RelStorage
         # An alternate way to do this is to run the container directly with a uses:
         # and then the script runs inside it. That may work better with caching.
