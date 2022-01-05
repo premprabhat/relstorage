@@ -212,8 +212,10 @@ jobs:
             yum -y install wget && \
             wget https://download-ib01.fedoraproject.org/pub/epel/7/aarch64/Packages/c/ccache-3.3.4-1.el7.aarch64.rpm && \
             rpm -i ccache-3.3.4-1.el7.aarch64.rpm && \
-            export CFLAGS=$CFLAGS -std=gnu++11 && \
-            export CXXFLAGS=$CXXCFLAGS -std=gnu++11 && \
+            export CFLAGS="$CFLAGS -std=gnu++11" && \
+            echo $CFLAGS && \
+            export CXXFLAGS="$CXXCFLAGS -std=gnu++11" && \
+            echo $CXXFLAGS && \
             echo "Install native libs" && \
             yum install -y libmemcached-devel && \
             echo "Install Build Dependencies" && \
