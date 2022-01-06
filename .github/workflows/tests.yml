@@ -355,7 +355,7 @@ jobs:
           parallel: true
 
   test_aarch64:
-    needs: build-relstorage-aarch64
+    #needs: build-relstorage-aarch64
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -377,11 +377,11 @@ jobs:
         id: qemu
         uses: docker/setup-qemu-action@v1
 
-      - name: Download RelStorage wheel
-        uses: actions/download-artifact@v2
-        with:
-          name: RelStorage-${{ runner.os }}-${{ matrix.python-version }}.whl
-          path: dist/
+      #- name: Download RelStorage wheel
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: RelStorage-${{ runner.os }}-${{ matrix.python-version }}.whl
+      #    path: dist/
       - name: Build mysqlclient
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
@@ -389,7 +389,7 @@ jobs:
             bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
             source .env/bin/activate && \
             echo "Install ccache, configure CFLAGS (ubuntu)" && \
-             yum -y install wget && \
+            yum -y install wget && \
             wget https://download-ib01.fedoraproject.org/pub/epel/7/aarch64/Packages/c/ccache-3.3.4-1.el7.aarch64.rpm && \
             rpm -i ccache-3.3.4-1.el7.aarch64.rpm && \
             export CFLAGS="$CFLAGS -std=gnu++11" && \
@@ -403,7 +403,7 @@ jobs:
             echo "Install RelStorage" && \
             pip install -U coverage && \
             pip install -U "faulthandler; python_version == "2.7" and platform_python_implementation==\"CPytho\n"" && \
-            pip install -U  "`ls dist/RelStorage-*.whl`[test,all_tested_drivers]" && \
+            pip install -U  "\"ls dist/RelStorage-*.whl\n"[test,all_tested_drivers]" && \
             unzip -n dist/RelStorage-*whl -d src && \
             deactivate'
 
