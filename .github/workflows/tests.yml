@@ -392,12 +392,14 @@ jobs:
             yum -y install wget && \
             wget https://download-ib01.fedoraproject.org/pub/epel/7/aarch64/Packages/c/ccache-3.3.4-1.el7.aarch64.rpm && \
             rpm -i ccache-3.3.4-1.el7.aarch64.rpm && \
+            wget https://distrib-coffee.ipsl.jussieu.fr/pub/linux/altlinux/p10/branch/aarch64/RPMS.classic/libmysqlclient21-devel-8.0.26-alt2.aarch64.rpm && \
+            rpm -i libmysqlclient21-devel-8.0.26-alt2.aarch64.rpm && \
             export CFLAGS="$CFLAGS -std=gnu++11" && \
             echo $CFLAGS && \
             export CXXFLAGS="$CXXCFLAGS -std=gnu++11" && \
             echo $CXXFLAGS && \
             echo "Install native libs" && \
-            yum install -y libmemcached-devel libmysqlclient21-devel && \
+            yum install -y libmemcached-devel && \
             echo "Build mysqlclient" && \
             pip install --no-binary :all: mysqlclient && \
             echo "Install RelStorage" && \
