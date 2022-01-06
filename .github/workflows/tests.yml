@@ -354,6 +354,75 @@ jobs:
         with:
           parallel: true
 
+  test_aarch64:
+    needs: build-relstorage-aarch64
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        python-version: [cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39]
+        # ubuntu 18.04 ships with mysql 5.7; ubuntu 20.04 ships with
+        # mysql 8.0
+        os: [ubuntu-18.04]
+        include:
+          - os: ubuntu-20.04
+            python-version: cp38-cp38
+    env:
+      py: /opt/python/${{ matrix.python-version }}/bin/python
+      img: quay.io/pypa/manylinux2014_aarch64
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: Set up QEMU
+        id: qemu
+        uses: docker/setup-qemu-action@v1
+
+      - name: Download RelStorage wheel
+        uses: actions/download-artifact@v2
+        with:
+          name: RelStorage-${{ runner.os }}-${{ matrix.python-version }}.whl
+          path: dist/
+      - name: Build mysqlclient
+        if: startsWith( matrix.os, 'ubuntu-20')
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+            ${{ env.img }} \
+            bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
+            source .env/bin/activate && \
+            echo "Install ccache, configure CFLAGS (ubuntu)" && \
+             yum -y install wget && \
+            wget https://download-ib01.fedoraproject.org/pub/epel/7/aarch64/Packages/c/ccache-3.3.4-1.el7.aarch64.rpm && \
+            rpm -i ccache-3.3.4-1.el7.aarch64.rpm && \
+            export CFLAGS="$CFLAGS -std=gnu++11" && \
+            echo $CFLAGS && \
+            export CXXFLAGS="$CXXCFLAGS -std=gnu++11" && \
+            echo $CXXFLAGS && \
+            echo "Install native libs" && \
+            yum install -y libmemcached-devel && \
+            echo "Build mysqlclient" && \
+            pip install --no-binary :all: mysqlclient && \
+            echo "Install RelStorage" && \
+            pip install -U coverage && \
+            pip install -U "faulthandler; python_version == "2.7" and platform_python_implementation==\"CPytho\n"" && \
+            pip install -U  "`ls dist/RelStorage-*.whl`[test,all_tested_drivers]" && \
+            unzip -n dist/RelStorage-*whl -d src && \
+            deactivate'
+
+      - name: Initialize Test Databases
+        if: startsWith(runner.os, 'Linux')
+        run: |
+          sudo systemctl start mysql.service
+          echo Configuring MySQL
+          RELSTORAGETEST_MY_PW="--password=root" .travis/mysql.sh
+          # XXX: Disabled: The software is installed, but isn't running by default,
+          # apparently. They *really* want you to use a docker service.
+          # echo Configuring PostgreSQL
+          # .travis/postgres.sh
+      - name: Run tests and report coverage
+        uses: ./.github/actions/run-tests
+        with:
+          useCoverage: ${{ !startsWith(matrix.python-version, 'pypy')  }}
+
   test-old-postgresql:
     needs: build-relstorage
     runs-on: ${{ matrix.os }}
