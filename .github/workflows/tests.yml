@@ -383,7 +383,6 @@ jobs:
           name: RelStorage-${{ runner.os }}-${{ matrix.python-version }}.whl
           path: dist/
       - name: Build mysqlclient
-        if: startsWith( matrix.os, 'ubuntu-20')
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             ${{ env.img }} \
