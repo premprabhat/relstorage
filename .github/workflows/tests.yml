@@ -399,9 +399,7 @@ jobs:
             pip install --no-binary :all: mysqlclient && \
             echo "Install RelStorage" && \
             pip install -U coverage && \
-            pip install -U "faulthandler; python_version == "2.7" and platform_python_implementation==\"CPython\n"" && \
-            #pip install -U  "\"ls dist/RelStorage-*.whl\n"[test,all_tested_drivers]" && \
-            #unzip -n dist/RelStorage-*whl -d src && \
+            pip install -U "faulthandler; python_version=="2.7" and platform_python_implementation==\"CPython\n"" && \
             deactivate'
 
       - name: Initialize Test Databases
