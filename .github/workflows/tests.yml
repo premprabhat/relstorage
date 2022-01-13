@@ -355,7 +355,7 @@ jobs:
           parallel: true
 
   test_aarch64:
-    #needs: build-relstorage-aarch64
+    needs: build-relstorage-aarch64
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -377,11 +377,11 @@ jobs:
         id: qemu
         uses: docker/setup-qemu-action@v1
 
-      #- name: Download RelStorage wheel
-      #  uses: actions/download-artifact@v2
-      #  with:
-      #    name: RelStorage-${{ runner.os }}-${{ matrix.python-version }}.whl
-      #    path: dist/
+      - name: Download RelStorage wheel
+        uses: actions/download-artifact@v2
+        with:
+          name: RelStorage-${{ runner.os }}-${{ matrix.python-version }}.whl
+          path: dist/
       - name: Build mysqlclient
         run: |
           docker run --rm -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
@@ -399,7 +399,8 @@ jobs:
             pip install --no-binary :all: mysqlclient && \
             echo "Install RelStorage" && \
             pip install -U coverage && \
-            pip install -U "faulthandler; python_version=="2.7" and platform_python_implementation==\"CPython\n"" && \
+            pip install -U "\"ls dist/RelStorage-*.whl\n"[test,all_tested_drivers]" && \
+            unzip -n dist/RelStorage-*whl -d src && \
             deactivate'
 
       - name: Initialize Test Databases
