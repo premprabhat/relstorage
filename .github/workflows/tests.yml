@@ -402,18 +402,14 @@ jobs:
             pip install -U "faulthandler; python_version == \"2.7\" and platform_python_implementation == \"CPython\"" && \
             pip install -U "`ls dist/RelStorage-*.whl`[test,all_tested_drivers]" && \
             unzip -n dist/RelStorage-*whl -d src && \
+            echo "Initialize Test Databases" && \
+            systemctl start mysql.service && \
+            echo "Configuring MySQL" && \
+            RELSTORAGETEST_MY_PW="--password=root" .travis/mysql.sh && \
+            echo "Configuring PostgreSQL" && \
+            .travis/postgres.sh && \
             deactivate'
 
-      - name: Initialize Test Databases
-        if: startsWith(runner.os, 'Linux')
-        run: |
-          sudo systemctl start mysql.service
-          echo Configuring MySQL
-          RELSTORAGETEST_MY_PW="--password=root" .travis/mysql.sh
-          # XXX: Disabled: The software is installed, but isn't running by default,
-          # apparently. They *really* want you to use a docker service.
-          # echo Configuring PostgreSQL
-          # .travis/postgres.sh
       - name: Run tests and report coverage
         uses: ./.github/actions/run-tests
         with:
