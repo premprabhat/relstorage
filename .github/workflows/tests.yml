@@ -360,12 +360,7 @@ jobs:
     strategy:
       matrix:
         python-version: [cp36-cp36m]
-        # ubuntu 18.04 ships with mysql 5.7; ubuntu 20.04 ships with
-        # mysql 8.0
-        os: [ubuntu-18.04]
-        include:
-          - os: ubuntu-20.04
-            python-version: cp38-cp38
+
     env:
       py: /opt/python/${{ matrix.python-version }}/bin/python
       img: quay.io/pypa/manylinux2014_aarch64
