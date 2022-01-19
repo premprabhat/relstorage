@@ -359,7 +359,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [cp36-cp36m, cp37-cp37m, cp38-cp38, cp39-cp39]
+        python-version: [cp36-cp36m]
         # ubuntu 18.04 ships with mysql 5.7; ubuntu 20.04 ships with
         # mysql 8.0
         os: [ubuntu-18.04]
@@ -394,7 +394,7 @@ jobs:
             export CXXFLAGS="$CXXCFLAGS -std=gnu++11" && \
             echo $CXXFLAGS && \
             echo "Install native libs" && \
-            yum install -y libmemcached-devel mysql-devel postgresql-devel && \
+            yum install -y libmemcached-devel mysql-devel postgresql-devel libffi-devel && \
             echo "Build mysqlclient" && \
             pip install --no-binary :all: mysqlclient && \
             echo "Install RelStorage" && \
