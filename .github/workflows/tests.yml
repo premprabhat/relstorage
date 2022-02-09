@@ -393,7 +393,8 @@ jobs:
             pip install -U "`ls dist/RelStorage-*.whl`[test,all_tested_drivers]" && \
             unzip -n dist/RelStorage-*whl -d src && \
             echo "Initialize Test Databases" && \
-            systemctl start mysql.service && \
+            #systemctl start mysql.service && \
+            service mysql start && \
             echo "Configuring MySQL" && \
             RELSTORAGETEST_MY_PW="--password=root" .travis/mysql.sh && \
             echo "Configuring PostgreSQL" && \
