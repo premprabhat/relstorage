@@ -374,7 +374,7 @@ jobs:
           path: dist/
       - name: Build mysqlclient
         run: |
-          docker run --rm -v /run/systemd/system:/run/systemd/system -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
+          docker run --rm --privileged -v ${{ github.workspace }}:/ws:rw --workdir=/ws \
             ${{ env.img }} \
             bash -exc '${{ env.py }} -m pip install virtualenv && ${{ env.py }} -m venv .env && \
             source .env/bin/activate && \
